@@ -1,0 +1,30 @@
+services:
+  db:
+    build:
+      context: ./database
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  fastapi:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./api/.env
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://postgres:password@db:5432/postgres"
+    volumes:
+      - ./api:/app
+
+volumes:
+  postgres_data:
