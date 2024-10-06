@@ -12,9 +12,9 @@
 - [X] Store in a vector database
 - [X] Retrieve similar phrases related to the question
 
-##### Directory Structure - Clean Architecture 
+##### Directory Structure - Clean Architecture V1
 ```
-bcgx-challenget/
+bcgx-challenger/
 │
 ├── api/
 │   ├── requirements.txt            # Dependencies
@@ -41,9 +41,35 @@ bcgx-challenget/
 - [ ] User questions
 - [X] Rank text similarity to user questions
 - [ ] Create RAG prompts
+  - [ ] 
+
+##### Directory Structure - Clean Architecture V2
+```
+bcgx-challenger/
+│
+├── api/
+│   ├── requirements.txt            # Dependencies
+│   ├── main.py                     # Entry point
+│   ├── domain/
+│   │   └── models.py               # Database models
+│   │   
+│   │
+│   ├── repositories/
+│   │   └── file_repository.py       # Data access layer
+│   │
+│   ├── usecases/
+│   │   └── file_usecases.py         # Business logic
+│   │
+│   └── framework/
+│       ├── database.py              # Database setup
+│       └── pdf_utils.py             # PDF extraction utilities
+│
+└── app/
+```
 
 #### **Phase 3:**
 - [ ] Initiate dialogue with the LLM
+- [ ] Consume API call on streamlit
 
 #### **Phase 4:**
 - [ ] Evaluate metrics for context and Q&A
@@ -68,9 +94,15 @@ bcgx-challenget/
 1. run command: `docker-compose up --build`
 2. Access the application at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
+### Run APP Interface Web
+1. install libraries: `pip install streamlit requests`
+2. run: `streamlit run app.py`
+
 ### Tech and Frameworks
-- **FastAPI** - Backend
-- **Postgres** - Vector Database
+- **[Streamlit](https://streamlit.io/generative-ai)** - Frontend
+- **[FastAPI](https://fastapi.tiangolo.com/)** - Backend
+- **[Postgres](https://www.postgresql.org/)** - Database
+- **[PG Vector](https://github.com/pgvector/pgvector)** - Vector Database
 
 ---
 
