@@ -26,5 +26,16 @@ services:
     volumes:
       - ./api:/app
 
+  streamlit:
+      build:
+        context: ./app
+        dockerfile: Dockerfile
+      ports:
+        - "8501:8501"
+      depends_on:
+        - db
+      volumes:
+        - ./app:/app
+
 volumes:
   postgres_data:
