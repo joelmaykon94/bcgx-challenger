@@ -1,6 +1,5 @@
 FROM postgres:latest
 
-# Install necessary packages
 RUN apt-get update \
     && apt-get install -y postgresql-server-dev-all git build-essential \
     && git clone --branch master https://github.com/pgvector/pgvector.git \
@@ -10,5 +9,4 @@ RUN apt-get update \
     && apt-get remove -y git build-essential \
     && apt-get autoremove -y
 
-# Ensure the shared preload libraries setting
 RUN echo "shared_preload_libraries = 'pgvector'" >> /usr/share/postgresql/postgresql.conf.sample
