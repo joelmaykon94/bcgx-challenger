@@ -1,9 +1,13 @@
 fastapi
 uvicorn[standard]
-sqlalchemy[asyncio]  # For async support
-asyncpg  # PostgreSQL driver for async
-pgvector  # PostgreSQL vector extension
-PyPDF2  # PDF processing
-openai  # OpenAI API client
-python-multipart  # For handling file uploads
+sqlalchemy[asyncio]
+asyncpg
+pgvector
+PyMuPDF==1.19.6 
+openai
+python-multipart
 watchfiles
+langchain
+numpy
+ragas
+
