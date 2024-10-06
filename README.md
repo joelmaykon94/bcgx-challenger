@@ -68,6 +68,7 @@ bcgx-challenger/
 ```
 
 #### **Phase 3:**
+- [X] Create app web with streamlit
 - [ ] Initiate dialogue with the LLM
 - [ ] Consume API call on streamlit
 
@@ -79,8 +80,11 @@ bcgx-challenger/
 - [ ] Link to source data for extraction
 
 ---
+### Run APP Web
+1. install libraries: `pip install streamlit requests`
+2. run: `streamlit run app.py`
 
-### Execution of the API Locally
+### Run APP API
 1. Clone the repository.
 2. Navigate to the directory: `cd bcgx-challenger/api`
 3. Install the required libraries: `pip install -r requirements.txt`
@@ -92,11 +96,8 @@ bcgx-challenger/
 
 ### Run with Docker
 1. run command: `docker-compose up --build`
-2. Access the application at: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### Run APP Interface Web
-1. install libraries: `pip install streamlit requests`
-2. run: `streamlit run app.py`
+2. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
+3. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### Tech and Frameworks
 - **[Streamlit](https://streamlit.io/generative-ai)** - Frontend
