@@ -17,6 +17,7 @@ async def process_question_answer(question: str, top_k: int, db: AsyncSession):
         raise HTTPException(status_code=404, detail="No similar files found.") from e
 
     response_data = await process_search_results(results, query_embedding, top_k)
+    print(response_data)
     score = await evaluate_answer_relevancy(question, response_data)
 
     return {"response": response_data, "relevancy_score": score}

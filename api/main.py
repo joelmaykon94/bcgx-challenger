@@ -38,16 +38,26 @@ async def handle_upload_file(document: UploadFile = File(...)):
         except HTTPException as http_exc:
             raise http_exc
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))  # Retorna erro 500
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/search")
 async def handle_search_similarity(query: str, top_k: int = Query(10, le=20)):
-    return await search_similar_files_usecase(query, top_k)
+    async with SessionLocal() as db:
+        try:
+            return await search_similar_files_usecase(query, top_k, db)
+        except HTTPException as http_exc:
+            raise http_exc
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/answer")
 async def answer_question_endpoint(question: str, top_k: int = 5):
-    try:
-        return await process_question_answer(question, top_k)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    async with SessionLocal() as db:
+        try:
+            return await process_question_answer(question, top_k, db)
+        except HTTPException as http_exc:
+            raise http_exc
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
