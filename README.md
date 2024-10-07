@@ -68,7 +68,7 @@ bcgx-challenger/
 ```
 
 #### **Phase 3:**
-- [X] Create app web with streamlit
+- [X] Create web app with streamlit
 - [ ] Initiate dialogue with the LLM
 - [ ] Consume API call on streamlit
 
