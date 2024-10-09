@@ -11,67 +11,17 @@
 - [X] Generate embeddings
 - [X] Store in a vector database
 - [X] Retrieve similar phrases related to the question
-
-##### Directory Structure - Clean Architecture V1
-```
-bcgx-challenger/
-│
-├── api/
-│   ├── requirements.txt            # Dependencies
-│   ├── main.py                     # Entry point
-│   ├── domain/
-│   │   └── models.py               # Database models
-│   │   
-│   │
-│   ├── repositories/
-│   │   └── file_repository.py       # Data access layer
-│   │
-│   ├── usecases/
-│   │   └── file_usecases.py         # Business logic
-│   │
-│   └── framework/
-│       ├── database.py              # Database setup
-│       └── pdf_utils.py             # PDF extraction utilities
-│
-└── app/
-```
-
-
 #### **Phase 2:**
-- [ ] User questions
 - [X] Rank text similarity to user questions
 - [ ] Create RAG prompts
-  - [ ] 
-
-##### Directory Structure - Clean Architecture V2
-```
-bcgx-challenger/
-│
-├── api/
-│   ├── requirements.txt            # Dependencies
-│   ├── main.py                     # Entry point
-│   ├── domain/
-│   │   └── models.py               # Database models
-│   │   
-│   │
-│   ├── repositories/
-│   │   └── file_repository.py       # Data access layer
-│   │
-│   ├── usecases/
-│   │   └── file_usecases.py         # Business logic
-│   │
-│   └── framework/
-│       ├── database.py              # Database setup
-│       └── pdf_utils.py             # PDF extraction utilities
-│
-└── app/
-```
-
+- [ ] Clean text extract
+- [ ] Create dataset question and answer
+- [ ] Validate params of LLM - GPT
+- [ ] Optimized context and prompt
 #### **Phase 3:**
 - [X] Create web app with streamlit
 - [ ] Initiate dialogue with the LLM
 - [ ] Consume API call on streamlit
-
 #### **Phase 4:**
 - [ ] Evaluate metrics for context and Q&A
 - [ ] Optimize prompts using RAG metrics
