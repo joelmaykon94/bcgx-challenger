@@ -61,3 +61,8 @@ async def answer_question_endpoint(question: str, top_k: int = 5):
             raise http_exc
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+       
+
+@app.get("/qna")
+async def answer_question_endpoint(question: str):
+    return {"answer": f"A funcionalidade para responder essa questão: '{question}' está sendo construida ...."}
