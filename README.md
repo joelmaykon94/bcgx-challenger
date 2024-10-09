@@ -95,9 +95,10 @@ bcgx-challenger/
 ---
 
 ### Run with Docker
-1. run command: `docker-compose up --build`
-2. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
-3. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
+1. Rename the .env.dev file to .env and update the OPENAI_API_KEY with your own key.
+2. run command: `docker-compose up --build`
+3. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
+4. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### Tech and Frameworks
 - **[Streamlit](https://streamlit.io/generative-ai)** - Frontend
