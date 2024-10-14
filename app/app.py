@@ -3,22 +3,73 @@ import requests
 import simplejson as json
 import os
 from dotenv import load_dotenv
+import time  # Certifique-se de importar o módulo time
+from fpdf import FPDF
 
 load_dotenv()
 
 api = os.getenv("API_URL")
 
+def upload_pdf(file):
+    url = f"{api}/upload_file"  # Endpoint correto para o upload do PDF
+
+    try:
+        # Abrir o arquivo como binário para enviá-lo
+        files = {'document': file}  # 'document' deve corresponder ao parâmetro da API
+        response = requests.post(url, files=files)
+        response.raise_for_status()  # Levanta erro para códigos 4xx/5xx
+        return response.json()  # Supondo que a API retorna a resposta em formato JSON
+    except requests.exceptions.HTTPError as http_err:
+        return {"answer": f"HTTP error occurred: {http_err}"}
+    except Exception as err:
+        return {"answer": f"An error occurred: {err}"}
+
 def get_qna(question):
-    url = f"{api}/qna?question={question}"
+    url = f"{api}/qna?question={question}"  # URL para perguntas e respostas
     try:
         response = requests.get(url)
-        print(response)
         response.raise_for_status() 
         return response.json()
     except requests.exceptions.HTTPError as http_err:
         return {"answer": f"HTTP error occurred: {http_err}", "references": []}
     except Exception as err:
         return {"answer": f"An error occurred: {err}", "references": []}
+
+def gerar_pdf(chat_history):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Adiciona cada entrada do chat no PDF
+    for entry in chat_history:
+        if 'user' in entry:
+            pdf.cell(200, 10, txt=f"Gestor: {entry['user']}", ln=True)
+        if 'assistant' in entry:
+            pdf.cell(200, 10, txt=f"Assistente: {entry['assistant']}", ln=True)
+    
+    # Gera o PDF em um buffer de memória
+    pdf_output = pdf.output(dest='S').encode('latin1')
+    return pdf_output
+
+def get_pdf_list():
+    try:
+        response = requests.get(f"{api}/list_pdfs")
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Erro ao buscar lista de PDFs: {e}")
+        return []
+
+def open_pdf_modal():
+    st.subheader("Lista de PDFs")
+    pdf_files = get_pdf_list()
+
+    if pdf_files:
+        for pdf in pdf_files:
+            pdf_link = f"{api}/get_pdf/{pdf['filename']}"
+            st.markdown(f"[Abrir {pdf['filename']}]({pdf_link})", unsafe_allow_html=True)
+    else:
+        st.write("Nenhum arquivo PDF encontrado.")
 
 with st.sidebar:
     st.subheader('Chatbot BCGX Challenge 2024')
@@ -27,11 +78,25 @@ with st.sidebar:
 
     btns = st.container()
 
+    # Uploader para PDF
     file = st.file_uploader("Upload de PDF", type=["pdf"])
 
-    if st.button("Fazer upload") and file:
-        data = json.load(file)
-        st.session_state.chat_history = data
+    # Botão para fazer o upload do PDF
+    if st.button("Fazer upload", key="upload_button") and file:
+        # Chamada à API para upload do PDF sem barra de progresso
+        with st.spinner('Aguarde enquanto o arquivo está sendo processado...'):
+            file.seek(0)  # Reposiciona o ponteiro do arquivo no início
+            response = upload_pdf(file)
+
+            if 'message' in response:
+                st.success(f"{response['message']}: {response['filename']}")
+                st.write(f"Texto extraído (primeiros 100 caracteres): {response['extracted_text']}")
+                st.write(f"Tamanho do embedding: {response['embedding_size']}")
+            else:
+                st.error('Falha no envio do arquivo. Tente novamente.')
+    
+    if st.button("Ver PDFs Disponíveis"):
+        open_pdf_modal()
 
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
@@ -48,32 +113,20 @@ if query := st.chat_input('Digite sua questão aqui'):
 
     for entry in st.session_state.chat_history:
         if 'user' in entry:
-            st.markdown(f"**Servidor:** {entry['user']}")
+            st.markdown(f"**Gestor:** {entry['user']}")
         if 'assistant' in entry:
             st.markdown(f"**Assistente:** {entry['assistant']}")
 
-# Optional buttons for multimedia
-#cols = st.columns(2)
-#if cols[0].button('Show me the multimedia'):
-#   st.image('https://tse4-mm.cn.bing.net/th/id/OIP-C.cy76ifbr2oQPMEs2H82D-QHaEv?w=284&h=181&c=7&r=0&o=5&dpr=1.5&pid=1.7')
-#   time.sleep(0.5)
-#   st.video('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4')
-#   time.sleep(0.5)
-#   st.audio('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4')
+if st.session_state.chat_history:
+    pdf_data = gerar_pdf(st.session_state.chat_history)
+    btns.download_button(
+        "Exportar diálogo em PDF",
+        data=pdf_data,
+        file_name="chat_gestor.pdf",
+        mime="application/pdf",
+    )
 
-btns.download_button(
-    "Exportar Markdown",
-    "".join(f"**Servidor:** {entry.get('user', '')}\n**Assistente:** {entry.get('assistant', '')}\n" for entry in st.session_state.chat_history),
-    file_name="chat_history.md",
-    mime="text/markdown",
-)
 
-btns.download_button(
-    "Exportar JSON",
-    json.dumps(st.session_state.chat_history),
-    file_name="chat_history.json",
-    mime="text/json",
-)
-
-if btns.button("Limpar histórico"):
+# Corrigido: Adicionado `key` único ao botão "Limpar histórico"
+if btns.button("Limpar histórico", key="clear_button"):
     st.session_state.chat_history = []
