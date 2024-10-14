@@ -2,3 +2,4 @@ streamlit
 requests
 simplejson
 python-dotenv
+fpdf
