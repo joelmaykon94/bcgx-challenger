@@ -9,4 +9,4 @@ RUN apt-get update \
     && apt-get remove -y git build-essential \
     && apt-get autoremove -y
 
-RUN echo "shared_preload_libraries = 'pgvector'" >> /usr/share/postgresql/postgresql.conf.sample
+RUN echo "shared_preload_libraries = 'pgvector'" >> /var/lib/postgresql/data/postgresql.conf
