@@ -11,67 +11,17 @@
 - [X] Generate embeddings
 - [X] Store in a vector database
 - [X] Retrieve similar phrases related to the question
-
-##### Directory Structure - Clean Architecture V1
-```
-bcgx-challenger/
-│
-├── api/
-│   ├── requirements.txt            # Dependencies
-│   ├── main.py                     # Entry point
-│   ├── domain/
-│   │   └── models.py               # Database models
-│   │   
-│   │
-│   ├── repositories/
-│   │   └── file_repository.py       # Data access layer
-│   │
-│   ├── usecases/
-│   │   └── file_usecases.py         # Business logic
-│   │
-│   └── framework/
-│       ├── database.py              # Database setup
-│       └── pdf_utils.py             # PDF extraction utilities
-│
-└── app/
-```
-
-
 #### **Phase 2:**
-- [ ] User questions
 - [X] Rank text similarity to user questions
 - [ ] Create RAG prompts
-  - [ ] 
-
-##### Directory Structure - Clean Architecture V2
-```
-bcgx-challenger/
-│
-├── api/
-│   ├── requirements.txt            # Dependencies
-│   ├── main.py                     # Entry point
-│   ├── domain/
-│   │   └── models.py               # Database models
-│   │   
-│   │
-│   ├── repositories/
-│   │   └── file_repository.py       # Data access layer
-│   │
-│   ├── usecases/
-│   │   └── file_usecases.py         # Business logic
-│   │
-│   └── framework/
-│       ├── database.py              # Database setup
-│       └── pdf_utils.py             # PDF extraction utilities
-│
-└── app/
-```
-
+- [ ] Clean text extract
+- [ ] Create dataset question and answer
+- [ ] Validate params of LLM - GPT
+- [ ] Optimized context and prompt
 #### **Phase 3:**
 - [X] Create web app with streamlit
 - [ ] Initiate dialogue with the LLM
 - [ ] Consume API call on streamlit
-
 #### **Phase 4:**
 - [ ] Evaluate metrics for context and Q&A
 - [ ] Optimize prompts using RAG metrics
@@ -95,9 +45,10 @@ bcgx-challenger/
 ---
 
 ### Run with Docker
-1. run command: `docker-compose up --build`
-2. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
-3. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
+1. Rename the .env.dev file to .env and update the OPENAI_API_KEY with your own key.
+2. run command: `docker-compose up --build`
+3. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
+4. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### Tech and Frameworks
 - **[Streamlit](https://streamlit.io/generative-ai)** - Frontend

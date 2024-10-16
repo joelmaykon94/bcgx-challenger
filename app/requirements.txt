@@ -1,2 +1,4 @@
 streamlit
 requests
+simplejson
+python-dotenv
