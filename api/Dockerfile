@@ -1,6 +1,13 @@
 # Dockerfile
 
-FROM python:3.9
+FROM python:3.8
+
+RUN apt-get update && apt-get install -y \
+    libmupdf-dev \
+    gcc \
+    python3-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

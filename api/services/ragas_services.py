@@ -1,74 +1,106 @@
-import os
-from ragas.metrics import AnswerRelevancy
-from ragas.llms import LangchainLLMWrapper
-from ragas.embeddings import LangchainEmbeddingsWrapper
-from langchain_openai.chat_models import ChatOpenAI
-from langchain_openai.embeddings import OpenAIEmbeddings
-from ragas.dataset_schema import SingleTurnSample
+from ragas.metrics import faithfulness
+from ragas import evaluate
+from datasets import Dataset
 
-# Initialize the Language Model and Embeddings Wrappers using OpenAI API
-llm = LangchainLLMWrapper(ChatOpenAI(api_key=os.getenv("OPENAI_API_KEY")))
-emb = LangchainEmbeddingsWrapper(OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY")))
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema.runnable import RunnablePassthrough
+from langchain.schema.output_parser import StrOutputParser
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Weaviate
+import weaviate
+from weaviate.embedded import EmbeddedOptions
+from dotenv import load_dotenv, find_dotenv
+from langchain_core.documents import Document
 
-# Instantiate the Answer Relevancy metric with the LLM and Embeddings
-answer_relevancy_metric = AnswerRelevancy(llm=llm, embeddings=emb)
 
-async def evaluate_answer_relevancy(question, response_data):
+client = weaviate.Client(
+    embedded_options=EmbeddedOptions()
+)
+
+def create_vectorstore_from_documents(documents):
+    embeddings = OpenAIEmbeddings()
+
+    vectorstore = Weaviate.from_documents(
+        client=client,
+        documents=documents,
+        embedding=embeddings,
+        by_text=False
+    )
+
+    return vectorstore
+
+def initialize_retriever(documents):
+    vectorstore = create_vectorstore_from_documents(documents)
+    retriever = vectorstore.as_retriever()
+    
+    return retriever
+
+
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+
+template = """You are an assistant for question-answering tasks. 
+Use the following pieces of retrieved context to answer the question. 
+If you don't know the answer, just say that you don't know. 
+Use two sentences maximum and keep the answer concise.
+Question: {question} 
+Context: {context} 
+Answer:
+"""
+
+prompt = ChatPromptTemplate.from_template(template)
+
+metrics = [faithfulness]
+
+async def get_answers_from_questions(questions, documents):
+    retriever = initialize_retriever(documents)
+
+    rag_chain = (
+        {"context": retriever,  "question": RunnablePassthrough()} 
+        | prompt 
+        | llm
+        | StrOutputParser() 
+    )
+    
+    answers = []
+    contexts = []
+
+    for query in questions:
+        answer = rag_chain.invoke(query)
+        contexts.append([docs.page_content for docs in retriever.get_relevant_documents(query)])
+        answers.append(answer)
+
+    return answers, contexts
+
+async def evaluate_answer_metrics(question, documents):
     """
-    Evaluates the relevancy of an answer to a given question using a pre-defined metric.
+    Avalia a resposta utilizando múltiplas métricas predefinidas.
 
     Args:
-        question (str): The user-input question to be evaluated.
-        response_data (list): A list containing dictionaries with the response and retrieved contexts.
-            - response_data[0]['top_phrases'] (list of dict): Contextual information that was used to generate the response.
+        question (str): Pergunta do usuário.
+        documents (list): Lista contendo os dados de resposta e contextos recuperados.
 
     Returns:
-        float: A score representing the relevancy of the answer to the given question.
-
-    Example:
-        response_data = [
-            {
-                "id": 1,
-                "filename": "document.pdf",
-                "similarity_score": 0.312,
-                "top_phrases": [
-                    {"phrase": "Sample phrase 1", "score": 0.442},
-                    {"phrase": "Sample phrase 2", "score": 0.431},
-                    # more phrases...
-                ]
-            }
-        ]
-        score = await evaluate_answer_relevancy("What is the capital of France?", response_data)
+        dict: Resultados das métricas para a pergunta fornecida.
     """
-    try:
-        top_phrases = response_data[0]["top_phrases"]
-        retrieved_contexts = [context["phrase"] for context in top_phrases]
-        row = SingleTurnSample(user_input=question, response=top_phrases[0]["phrase"], retrieved_contexts=retrieved_contexts)
+    if not documents or "top_phrases" not in documents[0]:
+        raise ValueError(
+            "A estrutura de documents é inválida. A chave 'top_phrases' está faltando.")
+    
+    retrieved_contexts = [
+        Document(
+            page_content=phrase["phrase"],
+        )
+        for document in documents 
+        for phrase in document["top_phrases"]  
+    
+    questions = [question]
+    answers, contexts = await get_answers_from_questions(questions=questions, documents=retrieved_contexts) 
 
-        async def get_score(metric, row):
-            """
-            Helper function to calculate the relevancy score for a given row.
-
-            Args:
-                metric (AnswerRelevancy): The metric used to calculate the score.
-                row (SingleTurnSample): The sample containing the question, response, and contexts.
-
-            Returns:
-                float: The relevancy score for the sample.
-            """
-            score = await metric.single_turn_ascore(row)
-            return score
-
-        return await get_score(answer_relevancy_metric, row)
-
-    except KeyError as e:
-        raise ValueError(f"Key error: {str(e)}. Ensure 'top_phrases' is present in response_data.") from e
-
-    except IndexError as e:
-        raise ValueError("Index error: response_data is empty or does not contain the expected structure.") from e
-
-    except TypeError as e:
-        raise ValueError(f"Type error: {str(e)}. Please check the structure of response_data.") from e
-
-    except Exception as e:
-        raise ValueError(f"An unexpected error occurred: {str(e)}") from e
+    dataset = Dataset.from_dict({
+        "question": questions,
+        "answer": answers,
+        "contexts": contexts,
+    })
+    print(dataset)
+    return evaluate(dataset=dataset, metrics=metrics)

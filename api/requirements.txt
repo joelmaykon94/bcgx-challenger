@@ -1,13 +1,18 @@
 fastapi
 uvicorn[standard]
+uvloop
+nest-asyncio
 sqlalchemy[asyncio]
 asyncpg
 pgvector
-PyMuPDF==1.19.6 
+PyMuPDF
 openai
 python-multipart
 watchfiles
 langchain
 numpy
 ragas
+scikit-llm
+weaviate-client
+
 

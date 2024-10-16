@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from repositories.file_repository import FileRepository
 from services.embedding_service import create_embedding
-from services.ragas_services import evaluate_answer_relevancy
+from services.ragas_services import evaluate_answer_metrics
 from repositories.file_repository import FileRepository
 from services.result_processing_service import process_search_results
 async def process_question_answer(question: str, top_k: int, db: AsyncSession):
@@ -16,7 +16,7 @@ async def process_question_answer(question: str, top_k: int, db: AsyncSession):
     except Exception as e:
         raise HTTPException(status_code=404, detail="No similar files found.") from e
 
-    response_data = await process_search_results(results, query_embedding, top_k)
-    score = await evaluate_answer_relevancy(question, response_data)
-
-    return {"response": response_data, "relevancy_score": score}
+    documents = await process_search_results(results, query_embedding, top_k)
+    score = await evaluate_answer_metrics(question, documents)
+    print(score)
+    return {"documents": documents, "relevancy_score": score}

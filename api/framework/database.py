@@ -12,7 +12,7 @@ DATABASE_URL = os.getenv(
 engine = create_async_engine(DATABASE_URL, echo=True, future=True)
 
 # Create a session factory bound to the asynchronous engine
-SessionLocal = sessionmaker(bind=engine, class_=AsyncSession)
+SessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 async def init_db():
     """
@@ -29,5 +29,10 @@ async def init_db():
         None: This function performs database setup asynchronously and does not return any value.
     """
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        await conn.run_sync(Base.metadata.create_all)  # Create tables based on models
+        
+        # Enable the 'vector' extension, if possible
+        try:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        except Exception as e:
+            print(f"Error enabling vector extension: {e}")  # Log error if extension fails
