@@ -5,18 +5,13 @@ RUN apt-get update \
     && git clone --branch master https://github.com/pgvector/pgvector.git \
     && cd pgvector \
     && make install \
+    && cd .. \
     && rm -rf pgvector \
     && apt-get remove -y git build-essential \
     && apt-get autoremove -y
 
 RUN echo "shared_preload_libraries = 'pgvector'" >> /usr/share/postgresql/postgresql.conf.sample
 
-ENV POSTGRES_INITDB_ARGS="--data-checksums"
-ENV PGDATA=/var/lib/postgresql/data
+RUN rm -rf /var/lib/postgresql/data/*
 
-RUN mkdir -p /var/lib/postgresql/data \
-    && chown -R postgres:postgres /var/lib/postgresql
-
-VOLUME ["/var/lib/postgresql/data"]
-
-EXPOSE 5432
+CMD ["postgres"]
