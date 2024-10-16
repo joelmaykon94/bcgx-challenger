@@ -1,16 +1,20 @@
-FROM postgres:latest
+# Usando a imagem alpine do Postgres 16
+FROM postgres:16-alpine
 
-RUN apt-get update \
-    && apt-get install -y postgresql-server-dev-all git build-essential \
+RUN apk update \
+    && apk add --no-cache \
+        postgresql-dev \
+        git \
+        build-base \
     && git clone --branch master https://github.com/pgvector/pgvector.git \
     && cd pgvector \
     && make install \
     && cd .. \
     && rm -rf pgvector \
-    && apt-get remove -y git build-essential \
-    && apt-get autoremove -y
+    && apk del git build-base \
+    && rm -rf /var/cache/apk/*
 
-RUN echo "shared_preload_libraries = 'pgvector'" >> /usr/share/postgresql/postgresql.conf.sample
+RUN echo "shared_preload_libraries = 'pgvector'" >> /usr/local/share/postgresql/postgresql.conf.sample
 
 RUN rm -rf /var/lib/postgresql/data/*
 
