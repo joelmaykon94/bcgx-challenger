@@ -1,14 +1,12 @@
-# Usando a imagem alpine do Postgres 16
 FROM postgres:16-alpine
 
-RUN apk update \
-    && apk add --no-cache \
-        postgresql-dev \
-        git \
-        build-base \
+RUN apk update && apk add --no-cache \
+    postgresql-dev \
+    git \
+    build-base \
     && git clone --branch master https://github.com/pgvector/pgvector.git \
     && cd pgvector \
-    && make install \
+    && make PG_CONFIG=/usr/local/bin/pg_config install \
     && cd .. \
     && rm -rf pgvector \
     && apk del git build-base \
