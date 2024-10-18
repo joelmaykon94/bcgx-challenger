@@ -20,8 +20,8 @@
 - [ ] Optimized context and prompt
 #### **Phase 3:**
 - [X] Create web app with streamlit
-- [ ] Initiate dialogue with the LLM
-- [ ] Consume API call on streamlit
+- [x] Initiate dialogue with the LLM
+- [x] Consume API call on streamlit
 #### **Phase 4:**
 - [ ] Evaluate metrics for context and Q&A
 - [ ] Optimize prompts using RAG metrics
