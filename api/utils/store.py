@@ -1,5 +1,4 @@
 import os
-
 import weaviate
 from langchain.vectorstores import Weaviate
 
@@ -37,7 +36,7 @@ def get_store():
     vectorstore = Weaviate(
         client=weaviate_client,
         index_name=os.environ.get("WEAVIATE_COLLECTION", "Document"),
-        text_key="content",
+        text_key="content"
     )
 
-    yield vectorstore
+    return vectorstore

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile
-from starlette.responses import StreamingResponse
+from fastapi.responses import JSONResponse
+
 
 from services.files import FilesService
 from utils.store import get_store
@@ -15,7 +16,19 @@ async def query(
     vectorstore=Depends(get_store),
 ):
     response = await FilesService.query(question, temperature, n_docs, vectorstore)
-    return StreamingResponse(response, media_type="text/event-stream")
+    answers = []
+    print(response)
+    for item in response:
+        if isinstance(item, dict):
+            answer = item.get("answer")
+        else:
+            answer = str(item)
+        if answer:
+            answers.append(answer)
+    result = ''.join(answers)
+    print(result)
+    
+    return JSONResponse(content={"answer": result})
 
 
 @router.post("/upload")

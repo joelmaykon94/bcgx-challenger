@@ -1,5 +1,4 @@
 import io
-
 from langchain import LLMChain
 from langchain.chains import RetrievalQA, StuffDocumentsChain
 from langchain_openai import ChatOpenAI
@@ -18,7 +17,8 @@ class FilesService:
 
     @staticmethod
     async def query(question, temperature, n_docs, vectorstore):
-        llm = ChatOpenAI(model_name="gpt-4o", streaming=True, temperature=temperature)
+        llm = ChatOpenAI(model_name="gpt-4o", streaming=True,
+                         temperature=temperature)
 
         messages = [
             SystemMessage(
@@ -42,8 +42,8 @@ class FilesService:
         qa_chain = LLMChain(llm=llm, prompt=prompt)
 
         doc_prompt = PromptTemplate(
-            template="Conteúdo do Documento ({document_name}) e Título {title}: {page_content}",
-            input_variables=["page_content", "document_name", "title"],
+            template="Conteúdo do Documento: {page_content}",
+            input_variables=["page_content"],
         )
 
         final_qa_chain = StuffDocumentsChain(
@@ -63,7 +63,12 @@ class FilesService:
     async def upload(file, chunk_size, vectorstore):
         data = await file.read()
         elements = partition_pdf(file=io.BytesIO(data))
-        text = [ele.text for ele in elements]
+
+        #TODO tratamento de engenharia de dados no texto
+        def medallion(text):
+            return text if text else ""
+
+        text = [medallion(ele.text) for ele in elements if ele.text]
 
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
@@ -72,12 +77,22 @@ class FilesService:
             add_start_index=True,
         )
 
-        docs = text_splitter.create_documents(["\n".join(text)])
+        docs = text_splitter.create_documents(text)
+
+        for doc in docs:
+            doc.metadata = {
+                "document_name": file.filename,
+                "title": file.filename.split('.')[0]
+            }
+
         vectorstore.add_documents(docs)
+
         response = {
             'message': 'Arquivo carregado com sucesso',
-            'filename': file.name,
+            'filename': file.filename,
             'extracted_text': docs[0].page_content if docs else 'Texto não disponível',
             'embedding_size': len(docs) if docs else 'Tamanho não disponível'
         }
+
+        print(response)
         return response

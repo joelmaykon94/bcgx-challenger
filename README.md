@@ -16,8 +16,8 @@
 - [ ] Create RAG prompts
 - [ ] Clean text extract
 - [ ] Create dataset question and answer
-- [ ] Validate params of LLM - GPT
-- [ ] Optimized context and prompt
+- [x] Validate params of LLM - GPT
+- [x] Optimized context and prompt
 #### **Phase 3:**
 - [X] Create web app with streamlit
 - [x] Initiate dialogue with the LLM
@@ -25,7 +25,7 @@
 #### **Phase 4:**
 - [ ] Evaluate metrics for context and Q&A
 - [ ] Optimize prompts using RAG metrics
-- [ ] Upload files with optimized prompts
+- [x] Upload files with optimized prompts
 - [ ] Human review of answers
 - [ ] Link to source data for extraction
 
@@ -45,7 +45,7 @@
 ---
 
 ### Run with Docker
-1. Rename the .env.dev file to .env and update the OPENAI_API_KEY with your own key.
+1. Rename directory **api** duplicate the **.env.dev** file to **.env** and update the OPENAI_API_KEY with your own key openai.
 2. run command: `docker-compose up --build`
 3. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
 4. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -53,9 +53,10 @@
 ### Tech and Frameworks
 - **[Streamlit](https://streamlit.io/generative-ai)** - Frontend
 - **[FastAPI](https://fastapi.tiangolo.com/)** - Backend
-- **[Postgres](https://www.postgresql.org/)** - Database
-- **[PG Vector](https://github.com/pgvector/pgvector)** - Vector Database
-
+- **[Weaviate](https://weaviate.io/)** - Vector Database AI-native
+- **[Embbeding](https://weaviate.io/developers/weaviate/model-providers/transformers/embeddings)** - Hugging Face Transformers
+#### Weaviate's integration with the Hugging Face Transformers library 
+![image](https://weaviate.io/assets/images/integration_transformers_embedding-c322f71d4ed11efa507ca71b1e344b5b.png)
 ---
 
 ### BCG X Squad Five

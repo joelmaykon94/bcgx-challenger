@@ -1,9 +1,7 @@
 import streamlit as st
 import requests
-import simplejson as json
 import os
 from dotenv import load_dotenv
-from fpdf import FPDF
 
 load_dotenv()
 
@@ -11,7 +9,6 @@ api = os.getenv("API_URL")
 
 def upload_file(file):
     url = f"{api}/files/upload"
-
     try:
         files = {'file': file}
         response = requests.post(url, files=files)
@@ -31,28 +28,15 @@ def get_qna(question):
     }
 
     try:
-        response = requests.get(url, params=params)  
-        response.raise_for_status()
-        return response.json()
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return {"answer": f"Error: Received response with status code {response.status_code}"}
     except requests.exceptions.HTTPError as http_err:
-        return {"answer": f"HTTP error occurred: {http_err}", "references": []}
+        return {"answer": f"HTTP error occurred: {http_err}"}
     except Exception as err:
-        return {"answer": f"An error occurred: {err}", "references": []}
-
-
-def gerar_pdf(chat_history):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    for entry in chat_history:
-        if 'user' in entry:
-            pdf.cell(200, 10, txt=f"Gestor: {entry['user']}", ln=True)
-        if 'assistant' in entry:
-            pdf.cell(200, 10, txt=f"Assistente: {entry['assistant']}", ln=True)
-    
-    pdf_output = pdf.output(dest='S').encode('latin1')
-    return pdf_output
+        return {"answer": f"An error occurred: {err}"}
 
 st.title('Chatbot BCGX Challenge 2024')
 
@@ -62,23 +46,32 @@ if 'upload_in_progress' not in st.session_state:
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
-with st.container():
-    file = st.file_uploader("Faça o upload de um PDF ou TXT", type=["pdf", "txt"])
+if 'user_input' not in st.session_state:
+    st.session_state.user_input = ""
 
-    if st.button("Fazer upload", key="upload_button", disabled=st.session_state.upload_in_progress) and file:
-        st.session_state.upload_in_progress = True
-        with st.spinner('Aguarde enquanto o arquivo está sendo processado...'):
-            file.seek(0)
-            response = upload_file(file)
+file = st.file_uploader("Faça o upload de um documento PDF", type=["pdf", "txt"])
 
-            if 'message' in response:
-                st.success(f"{response['message']}: {response['filename']}")
-                st.session_state.chat_history.append({"assistant": f"Documento '{response['filename']}' salvo com sucesso!"})
-            else:
-                st.error('Falha no envio do arquivo. Tente novamente ou entre em contato com o suporte.')
-                st.session_state.chat_history.append({"assistant": "Falha ao salvar o documento. Tente novamente ou entre em contato com o suporte."})
+if st.session_state.upload_in_progress:
+    st.warning("Aguarde, o upload está em progresso...")
+    st.stop()
 
-        st.session_state.upload_in_progress = False  # Marca o fim do upload
+if st.button("Fazer upload") and file:
+    st.session_state.upload_in_progress = True
+    st.session_state.chat_history.append({"assistant": "Ok, vamos fazer o upload do seu documento."})
+    
+    with st.spinner('Aguarde enquanto o arquivo está sendo processado...'):
+        file.seek(0)
+        data = upload_file(file)
+        message = data.get('response', {}).get('message', "")
+        filename = data.get('response', {}).get('filename', "")
+        
+        if message:
+            st.success(f"{message}: {filename}")
+            st.session_state.chat_history.append({"assistant": f"Documento '{filename}' salvo com sucesso!"})
+        else:
+            st.session_state.chat_history.append({"assistant": "Falha ao salvar o documento. Tente novamente."})
+
+    st.session_state.upload_in_progress = False
 
 for entry in st.session_state.chat_history:
     if 'user' in entry:
@@ -86,29 +79,27 @@ for entry in st.session_state.chat_history:
     if 'assistant' in entry:
         st.markdown(f"**Assistente:** {entry['assistant']}")
 
-user_input = st.text_input("Digite sua questão ou texto aqui:", key="input_box", help="Digite aqui sua pergunta para o assistente")
+user_input = st.text_input("Digite sua questão ou texto aqui:", value=st.session_state.user_input, key="input_box")
 
-if st.button("Enviar pergunta", key="send_button"):
+if st.session_state.upload_in_progress:
+    st.text_input("Digite sua questão ou texto aqui:", value=user_input, key="input_box", disabled=True)
+    send_button_disabled = True
+else:
+    send_button_disabled = False
+
+if st.button("Enviar pergunta", key="send_button", disabled=send_button_disabled):
     if user_input:
         st.session_state.chat_history.append({"user": user_input})
-        response = get_qna(user_input)
+        st.session_state.upload_in_progress = True  # Disable further inputs during API call
+        data = get_qna(user_input)
 
-        if "answer" in response:
-            st.session_state.chat_history.append({"assistant": response['answer']})
+        if data["answer"]:
+            st.session_state.chat_history.append({"assistant": data["answer"]})
         else:
-            st.session_state.chat_history.append({"assistant": "Error fetching answer."})
+            st.session_state.chat_history.append({"assistant": "Erro ao buscar resposta."})
 
-        st.experimental_rerun()
+        st.session_state.user_input = ""
+        st.session_state.upload_in_progress = False
 
-if st.session_state.chat_history:
-    pdf_data = gerar_pdf(st.session_state.chat_history)
-    st.download_button(
-        "Exportar diálogo em PDF",
-        data=pdf_data,
-        file_name="chat_gestor.pdf",
-        mime="application/pdf",
-    )
-
-if st.button("Limpar histórico", key="clear_button"):
+if st.button("Limpar histórico"):
     st.session_state.chat_history = []
-    st.experimental_rerun()
