@@ -1,81 +1,27 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile, Depends
-from fastapi.responses import StreamingResponse
-from contextlib import asynccontextmanager
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-import io
+import logging
+import os
 
-from domain.models import FileModel
-from framework.database import SessionLocal, init_db
-from usecases.upload_usecase import upload_file_usecase
-from usecases.question_usecases import process_question_answer
+import uvicorn
+from fastapi import FastAPI
 
-app = FastAPI(
-    title="BCG X Challenger API",
-    description="This is the API documentation for BCG X Challenger. It allows you to interact with the application's endpoints.",
-    version="1.0.1",
-    contact={
-        "name": "Github",
-        "url": "https://github.com/joelmaykon94/bcgx-challenger",
-    },
-    license_info={
-        "name": "MIT License",
-        "url": "https://opensource.org/licenses/MIT",
-    },
-)
+from routers import files
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Starting up...")
-    await init_db()  
-    yield
-    print("Shutting down...")
+logger = logging.getLogger(__name__)
 
-app.lifespan = lifespan
+app = FastAPI()
 
-async def get_db() -> AsyncSession:
-    async with SessionLocal() as session:
-        yield session
-
-@app.post("/upload_file")
-async def handle_upload_file(document: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
-    try:
-        return await upload_file_usecase(document, db)
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception as e:
-        print(f"Error in upload_file: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error uploading file.")
-
-@app.post("/answer")
-async def answer_question_endpoint(question: str, top_k: int = 5, db: AsyncSession = Depends(get_db)):
-    return await process_question_answer(question, top_k, db)
+app.include_router(files.router)
 
 
-@app.get("/list_pdfs")
-async def list_pdfs(db: AsyncSession = Depends(get_db)):
-    try:
-        result = await db.execute(select(FileModel).where(FileModel.filename.like('%.pdf')))
-        pdf_files = result.scalars().all()
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
-        if not pdf_files:
-            raise HTTPException(status_code=404, detail="No PDF files found.")
-        
-        return [{"id": file.id, "filename": file.filename} for file in pdf_files]
-    except Exception as e:
-        print(f"Error in list_pdfs: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error retrieving PDF list.")
 
-@app.get("/get_pdf/{filename}")
-async def get_pdf(filename: str, db: AsyncSession = Depends(get_db)):
-    try:
-        result = await db.execute(select(FileModel).where(FileModel.filename == filename))
-        file = result.scalar_one_or_none()
+@app.get("/health")
+async def health():
+    return {"message": "OK"}
 
-        if file and file.content:  # Check if content is not None
-            return StreamingResponse(io.BytesIO(file.content), media_type='application/pdf', headers={'Content-Disposition': f'attachment; filename={filename}'})
-        else:
-            raise HTTPException(status_code=404, detail="PDF file not found.")
-    except Exception as e:
-        print(f"Error in get_pdf: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error retrieving PDF.")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ["FASTAPI_PORT"]))
