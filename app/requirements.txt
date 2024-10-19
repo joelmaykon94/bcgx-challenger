@@ -1,4 +1,6 @@
 streamlit
+hugchat==0.0.8
+streamlit-markdown>=1.0.9
 requests
 simplejson
 python-dotenv

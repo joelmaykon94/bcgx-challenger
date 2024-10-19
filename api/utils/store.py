@@ -1,6 +1,6 @@
 import os
 import weaviate
-from langchain.vectorstores import Weaviate
+from langchain_community.vectorstores import Weaviate
 
 
 def create_class(
