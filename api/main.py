@@ -4,7 +4,7 @@ import os
 import uvicorn
 from fastapi import FastAPI
 
-from api.routers import files_router
+from routers import files_router
 
 logger = logging.getLogger(__name__)
 
