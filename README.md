@@ -1,5 +1,5 @@
 # BCGX Challenger
-
+![video](./assets/video_ecodocs_ia.gif)
 ### The Mission
 
 #### **Phase 1:**
