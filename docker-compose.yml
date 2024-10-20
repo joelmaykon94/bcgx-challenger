@@ -12,6 +12,8 @@ services:
     volumes:
       - ./api:/app
       - ./medalion/bronze:/app/medalion/bronze
+    depends_on:
+        - weaviate
 
   streamlit:
       build:
