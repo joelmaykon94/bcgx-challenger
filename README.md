@@ -29,22 +29,11 @@
 - [ ] Human review of answers
 
 ---
-### Run APP Web
-1. install libraries: `pip install streamlit requests`
-2. run: `streamlit run app.py`
-
-### Run APP API
-1. Clone the repository.
-2. Navigate to the directory: `cd bcgx-challenger/api`
-3. Install the required libraries: `pip install -r requirements.txt`
-4. Run the application: `uvicorn main:app --reload`
-5. configure the connection with postgres database `DATABASE_URL` into file bcgx-challenger/api/main.py - reflects the details of a remote database if it is not a localhost database.
-6. Access the application at: [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
 
 ### Run with Docker
-1. Rename directory **api** duplicate the **.env.dev** file to **.env** and update the OPENAI_API_KEY with your own key openai.
+**After clone this repository:**
+
+1. Duplicate the .env.dev file into the root, api, and app directories, renaming it to .env. Then, add your OpenAI API key to the OPENAI_API_KEY field in the .env file located in the api directory.
 2. run command: `docker-compose up --build`
 3. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
 4. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
