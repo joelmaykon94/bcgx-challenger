@@ -1,6 +1,6 @@
 import requests
 from core.settings import settings
-from domain.models.upload_model import UploadResponse
+from core.models.upload_model import UploadResponse
 
 class UploadService:
     @staticmethod

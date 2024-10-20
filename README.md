@@ -13,7 +13,7 @@
 - [X] Retrieve similar phrases related to the question
 #### **Phase 2:**
 - [X] Rank text similarity to user questions
-- [ ] Create RAG prompts
+- [X] Create RAG prompts
 - [ ] Clean text extract
 - [ ] Create dataset question and answer
 - [x] Validate params of LLM - GPT
@@ -27,7 +27,6 @@
 - [ ] Optimize prompts using RAG metrics
 - [x] Upload files with optimized prompts
 - [ ] Human review of answers
-- [ ] Link to source data for extraction
 
 ---
 ### Run APP Web
@@ -58,6 +57,9 @@
 #### Weaviate's integration with the Hugging Face Transformers library 
 ![image](https://weaviate.io/assets/images/integration_transformers_embedding-c322f71d4ed11efa507ca71b1e344b5b.png)
 ---
+
+### Arquitetura API
+![api](./assets/api_ecodocs.png)
 
 ### BCG X Squad Five
 
