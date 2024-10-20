@@ -25,16 +25,18 @@ class FilesService:
                 content="Você é um algoritmo de classe mundial para responder perguntas com base em documentos."
             ),
             HumanMessage(
-                content="Use apenas as informações contidas nos seguintes documentos para responder à pergunta:"
+                content="Use como base as informações contidas nos documentos para responder à pergunta:"
             ),
             HumanMessagePromptTemplate.from_template("{context}"),
             HumanMessage(
-                content="Dicas: Se você não encontrar uma resposta relevante nos documentos fornecidos, diga que não sabe."
+                content="Dicas: Se você não encontrar uma resposta relevante nos documentos fornecidos, diga que não sabe e não irá poder ajudar."
             ),
             HumanMessage(
-                content="Dicas: Se encontrar a resposta relevante nos documentos fornecidos, cite as referências e qual documento do banco de dados foi utilizado."
+                content="Dicas: Se encontrar a resposta relevante nos documentos fornecidos, cite as referências e qual documento do banco de dados foi utilizado. Exemplo: 'O primeiro documento contém determinada informação que...'"
             ),
             HumanMessagePromptTemplate.from_template("Pergunta: {question}"),
+            HumanMessagePromptTemplate.from_template("Essa pergunta é sobre  planos de ação sobre mudanças climáticas e mitigação para adaptar-se a essas mudanças: {question}"),
+            HumanMessagePromptTemplate.from_template("Complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"),
         ]
 
         prompt = ChatPromptTemplate(messages=messages)

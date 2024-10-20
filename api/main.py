@@ -4,13 +4,13 @@ import os
 import uvicorn
 from fastapi import FastAPI
 
-from routers import files
+from routers import files_router
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-app.include_router(files.router)
+app.include_router(files_router.router)
 
 
 @app.get("/")

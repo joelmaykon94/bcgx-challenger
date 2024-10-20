@@ -1,6 +1,6 @@
 import requests
 from core.settings import settings
-from domain.models.query_model import QueryResponse
+from core.models.query_model import QueryResponse
 
 class QueryService:
     @staticmethod

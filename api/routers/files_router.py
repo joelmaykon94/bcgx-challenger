@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import JSONResponse
 
 
-from services.files import FilesService
+from services.files_service import FilesService
 from utils.store import get_store
 
 router = APIRouter(prefix="/files", tags=["files"])
