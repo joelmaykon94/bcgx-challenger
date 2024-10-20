@@ -4,11 +4,9 @@ from core.services.upload_service import UploadService
 
 st.set_page_config(page_title="🤖 EcoDocs A.I")
 
-# Ajustando o fundo da página com o gradiente no Streamlit
 st.markdown(
     """
     <style>
-    /* Aplica o gradiente radial no fundo de todo o conteúdo da página */
     div.stApp {
         background: radial-gradient(circle, #a8e6cf, #dcedc1);
         font-family: Arial, sans-serif;
@@ -20,7 +18,6 @@ st.markdown(
 )
 
 
-# CSS para tornar o header fixo no topo da página
 st.markdown(
     """
     <style>
@@ -42,7 +39,6 @@ st.markdown(
         height: auto;
     }
     
-    /* Adiciona um padding para compensar o header fixo */
     .stApp {
         margin-top: 10%;
     }
@@ -115,14 +111,14 @@ for message in st.session_state.messages:
             answer_assistant = (
                 f"<span style='color: #333333; font-size: 18px; font-family: Arial, sans-serif;'>"
                 f" {message['content']}</span>"
-            )  # Tom de cinza escuro (#333333)
+            )
             st.markdown(answer_assistant, unsafe_allow_html=True)
     else:
         with st.chat_message("user"):
             question_user = (
                 f"<span style='color: #000000; font-size: 18px; font-family: Arial, sans-serif;'>"
                 f" {message['content']}</span>"
-            )  # Preto (#000000)
+            )
             st.markdown(question_user, unsafe_allow_html=True)
 
 if prompt := st.chat_input(placeholder="Digite sua mensagem aqui"):
