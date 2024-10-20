@@ -8,9 +8,9 @@ st.set_page_config(page_title="🤖 EcoDocs A.I")
 st.markdown(
     """
     <style>
-    /* Aplica o gradiente no fundo de todo o conteúdo da página */
+    /* Aplica o gradiente radial no fundo de todo o conteúdo da página */
     div.stApp {
-        background: linear-gradient(135deg, #8fd080, #4b7740);
+        background: radial-gradient(circle, #a8e6cf, #dcedc1);
         font-family: Arial, sans-serif;
         color: #333333;  /* Cor escura para o texto */
     }
@@ -18,7 +18,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 
 
 # CSS para tornar o header fixo no topo da página
