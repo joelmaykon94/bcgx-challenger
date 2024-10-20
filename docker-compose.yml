@@ -11,6 +11,7 @@ services:
       DATABASE_URL: "postgresql+asyncpg://postgres:password@db:5432/postgres"
     volumes:
       - ./api:/app
+      - ./medalion/bronze:/app/medalion/bronze
 
   streamlit:
       build:

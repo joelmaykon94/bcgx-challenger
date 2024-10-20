@@ -1,4 +1,5 @@
 import io
+
 from langchain import LLMChain
 from langchain.chains import RetrievalQA, StuffDocumentsChain
 from langchain_openai import ChatOpenAI
@@ -35,8 +36,7 @@ class FilesService:
                 content="Dicas: Se encontrar a resposta relevante nos documentos fornecidos, cite as referências e qual documento do banco de dados foi utilizado. Exemplo: 'O primeiro documento contém determinada informação que...'"
             ),
             HumanMessagePromptTemplate.from_template("Pergunta: {question}"),
-            HumanMessagePromptTemplate.from_template("Essa pergunta é sobre  planos de ação sobre mudanças climáticas e mitigação para adaptar-se a essas mudanças: {question}"),
-            HumanMessagePromptTemplate.from_template("Complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"),
+            HumanMessagePromptTemplate.from_template("Dicas: Se encontrar a resposta relevante nos documentos fornecidos, complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"),
         ]
 
         prompt = ChatPromptTemplate(messages=messages)
@@ -63,38 +63,49 @@ class FilesService:
 
     @staticmethod
     async def upload(file, chunk_size, vectorstore):
-        data = await file.read()
-        elements = partition_pdf(file=io.BytesIO(data))
+        response = {}
+        existing_doc = await vectorstore.get_document_by_filename(file.filename)
+        if not existing_doc:
+            data = await file.read()
+            elements = partition_pdf(file=io.BytesIO(data))
 
-        #TODO tratamento de engenharia de dados no texto
-        def medallion(text):
-            return text if text else ""
+            #TODO tratamento de engenharia de dados no texto
+            def medallion(text):
+                return text if text else ""
 
-        text = [medallion(ele.text) for ele in elements if ele.text]
+            text = [medallion(ele.text) for ele in elements if ele.text]
 
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size,
-            chunk_overlap=20,
-            length_function=len,
-            add_start_index=True,
-        )
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=20,
+                length_function=len,
+                add_start_index=True,
+            )
 
-        docs = text_splitter.create_documents(text)
+            docs = text_splitter.create_documents(text)
 
-        for doc in docs:
-            doc.metadata = {
-                "document_name": file.filename,
-                "title": file.filename.split('.')[0]
+            for doc in docs:
+                doc.metadata = {
+                    "document_name": file.filename,
+                    "title": file.filename.split('.')[0]
+                }
+
+            vectorstore.add_documents(docs)
+
+            response = {
+                'message': 'Arquivo carregado com sucesso',
+                'filename': file.filename,
+                'extracted_text': docs[0].page_content if docs else 'Texto não disponível',
+                'embedding_size': len(docs) if docs else 'Tamanho não disponível'
             }
-
-        vectorstore.add_documents(docs)
+            return response
 
         response = {
-            'message': 'Arquivo carregado com sucesso',
-            'filename': file.filename,
-            'extracted_text': docs[0].page_content if docs else 'Texto não disponível',
-            'embedding_size': len(docs) if docs else 'Tamanho não disponível'
-        }
-
-        print(response)
+                'message': 'Arquivo já existe no banco de dados',
+                'filename': file.filename,
+                'extracted_text': docs[0].page_content if docs else 'Texto não disponível',
+                'embedding_size': len(docs) if docs else 'Tamanho não disponível'
+            }
         return response
+
+            
