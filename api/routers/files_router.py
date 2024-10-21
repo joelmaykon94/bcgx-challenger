@@ -15,7 +15,7 @@ async def query(
     n_docs: int = 10,
     vectorstore=Depends(get_store),
 ):
-    response = await FilesService.query(question, temperature, n_docs, vectorstore)
+    response = FilesService.query(question, temperature, n_docs, vectorstore)
     answers = []
     print(response)
     for item in response:
