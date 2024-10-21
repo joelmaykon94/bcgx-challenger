@@ -1,68 +1,55 @@
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile
-from contextlib import asynccontextmanager
-from framework.database import SessionLocal, init_db
-from usecases.upload_usecase import upload_file_usecase
-from usecases.search_usecase import search_similar_files_usecase
-from usecases.question_usecases import process_question_answer
+import logging
+import os
+
+import uvicorn
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
+from routers import files_router
+from services.files_service import FilesService
+from utils.store import get_store
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI()
+
+app.include_router(files_router.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Ajuste conforme necessário
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-app = FastAPI(title="BCG X Challenger API",
-              description="This is the API documentation for BCG X Challenger. It allows you to interact with the application's endpoints.",
-              version="1.0.1",
-              contact={
-                  "name": "Github",
-                  "url": "https://github.com/joelmaykon94/bcgx-challenger",
-              },
-              license_info={
-                  "name": "MIT License",
-                  "url": "https://opensource.org/licenses/MIT",
-              },)
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Starting up...")
-    await init_db()
+@app.get("/health")
+async def health():
+    return {"message": "OK"}
 
-    yield
-    print("Shutting down...")
+@app.on_event("startup")
+async def startup_event():
+    vectorstore = get_store()
+    BRONZE_DIRECTORY = '/app/medalion/bronze'
 
-app.lifespan = lifespan
+    if not os.path.exists(BRONZE_DIRECTORY):
+        print(f"Directory {BRONZE_DIRECTORY} does not exist.")
+        return
+    
+    for filename in os.listdir(BRONZE_DIRECTORY):
+        if filename.endswith(".pdf"):
+            file_path = os.path.join(BRONZE_DIRECTORY, filename)
+            print(f"Uploading file: {file_path}")
+            chunk_size = 200
+            async with open(file_path, "rb") as file: 
+                response = await FilesService.upload(file, chunk_size, vectorstore)
+                print(response)
 
-
-@app.post("/upload_file")
-async def handle_upload_file(document: UploadFile = File(...)):
-    async with SessionLocal() as db:
-        try:
-            return await upload_file_usecase(document, db)
-        except HTTPException as http_exc:
-            raise http_exc
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/search")
-async def handle_search_similarity(query: str, top_k: int = Query(10, le=20)):
-    async with SessionLocal() as db:
-        try:
-            return await search_similar_files_usecase(query, top_k, db)
-        except HTTPException as http_exc:
-            raise http_exc
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/answer")
-async def answer_question_endpoint(question: str, top_k: int = 5):
-    async with SessionLocal() as db:
-        try:
-            return await process_question_answer(question, top_k, db)
-        except HTTPException as http_exc:
-            raise http_exc
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-       
-
-@app.get("/qna")
-async def answer_question_endpoint(question: str):
-    return {"answer": f"A funcionalidade para responder essa questão: '{question}' está sendo construida ...."}
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ["FASTAPI_PORT"]))

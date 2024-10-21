@@ -1,5 +1,5 @@
 # BCGX Challenger
-
+![video](./assets/video_ecodocs_ia.gif)
 ### The Mission
 
 #### **Phase 1:**
@@ -13,39 +13,27 @@
 - [X] Retrieve similar phrases related to the question
 #### **Phase 2:**
 - [X] Rank text similarity to user questions
-- [ ] Create RAG prompts
+- [X] Create RAG prompts
 - [ ] Clean text extract
 - [ ] Create dataset question and answer
-- [ ] Validate params of LLM - GPT
-- [ ] Optimized context and prompt
+- [x] Validate params of LLM - GPT
+- [x] Optimized context and prompt
 #### **Phase 3:**
 - [X] Create web app with streamlit
-- [ ] Initiate dialogue with the LLM
-- [ ] Consume API call on streamlit
+- [x] Initiate dialogue with the LLM
+- [x] Consume API call on streamlit
 #### **Phase 4:**
 - [ ] Evaluate metrics for context and Q&A
 - [ ] Optimize prompts using RAG metrics
-- [ ] Upload files with optimized prompts
+- [x] Upload files with optimized prompts
 - [ ] Human review of answers
-- [ ] Link to source data for extraction
-
----
-### Run APP Web
-1. install libraries: `pip install streamlit requests`
-2. run: `streamlit run app.py`
-
-### Run APP API
-1. Clone the repository.
-2. Navigate to the directory: `cd bcgx-challenger/api`
-3. Install the required libraries: `pip install -r requirements.txt`
-4. Run the application: `uvicorn main:app --reload`
-5. configure the connection with postgres database `DATABASE_URL` into file bcgx-challenger/api/main.py - reflects the details of a remote database if it is not a localhost database.
-6. Access the application at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
 ### Run with Docker
-1. Rename the .env.dev file to .env and update the OPENAI_API_KEY with your own key.
+**After clone this repository:**
+
+1. Duplicate the .env.dev file into the root, api, and app directories, renaming it to .env. Then, add your OpenAI API key to the OPENAI_API_KEY field in the .env file located in the api directory.
 2. run command: `docker-compose up --build`
 3. Access the app **Web** at: [http://localhost:8501](http://localhost:8501/)
 4. Access the app **API** at: [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -53,10 +41,18 @@
 ### Tech and Frameworks
 - **[Streamlit](https://streamlit.io/generative-ai)** - Frontend
 - **[FastAPI](https://fastapi.tiangolo.com/)** - Backend
-- **[Postgres](https://www.postgresql.org/)** - Database
-- **[PG Vector](https://github.com/pgvector/pgvector)** - Vector Database
-
+- **[Weaviate](https://weaviate.io/)** - Vector Database AI-native
+- **[Embbeding](https://weaviate.io/developers/weaviate/model-providers/transformers/embeddings)** - Hugging Face Transformers
+#### Weaviate's integration with the Hugging Face Transformers library 
+![image](https://weaviate.io/assets/images/integration_transformers_embedding-c322f71d4ed11efa507ca71b1e344b5b.png)
 ---
+
+### API Architecture
+![api](./assets/api_ecodocs.png)
+
+### Frontend Architecture
+![frontend](./assets/frontend_ecodocs.png)
+
 
 ### BCG X Squad Five
 
