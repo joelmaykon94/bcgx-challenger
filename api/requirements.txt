@@ -8,11 +8,10 @@ langchain
 langchain-community
 langchain-openai 
 pydantic
-ragas
-scikit-llm
 weaviate-client
 nltk
 unstructured[pdf]
 httpx
-pytest
 pyyaml
+ragas
+numpy

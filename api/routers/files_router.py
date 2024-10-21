@@ -15,19 +15,7 @@ async def query(
     n_docs: int = 10,
     vectorstore=Depends(get_store),
 ):
-    response = await FilesService.query(question, temperature, n_docs, vectorstore)
-    answers = []
-    print(response)
-    for item in response:
-        if isinstance(item, dict):
-            answer = item.get("answer")
-        else:
-            answer = str(item)
-        if answer:
-            answers.append(answer)
-    result = ''.join(answers)
-    print(result)
-    
+    result = await FilesService.query(question, temperature, n_docs, vectorstore)
     return JSONResponse(content={"answer": result})
 
 

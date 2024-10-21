@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import files_router
 from services.files_service import FilesService
 from utils.store import get_store
+import warnings
 
+warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
