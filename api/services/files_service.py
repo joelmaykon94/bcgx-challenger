@@ -19,6 +19,8 @@ from langchain.schema import HumanMessage, SystemMessage
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from unstructured.partition.pdf import partition_pdf
 
+from utils.clean_text import clean_pdf
+
 
 class FilesService:
     @staticmethod
@@ -69,7 +71,7 @@ class FilesService:
             retriever=vectorstore.as_retriever(search_kwargs={"k": n_docs}),
             combine_documents_chain=final_qa_chain,
         )
-        
+
         response = FilesService._openai_streamer(retrieval_qa, question)
         answers = []
 
@@ -81,78 +83,66 @@ class FilesService:
             if answer:
                 answers.append(answer)
 
-
         retriever = vectorstore.as_retriever(search_kwargs={"k": n_docs})
-        contexts = []
         documents = retriever.get_relevant_documents(question)
         retrieved_contexts = [doc.page_content for doc in documents]
-     
-        
-        try:
-            emb = LangchainEmbeddingsWrapper(OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY")))
-            answer_relevancy_metric = AnswerRelevancy(llm=llm, embeddings=emb)
-            # Supondo que answers seja uma lista de strings, vamos garantir que todas as respostas sejam concatenadas corretamente
-            answers_str = ''.join(answers) if isinstance(answers, list) else answers
 
-            # Supondo que retrieved_contexts seja uma lista de strings, concatene o contexto recuperado em uma única string
-            retrieved_contexts_str = ' '.join(retrieved_contexts) if isinstance(retrieved_contexts, list) else retrieved_contexts
+        try:
+            emb = LangchainEmbeddingsWrapper(
+                OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
+            )
+            answer_relevancy_metric = AnswerRelevancy(llm=llm, embeddings=emb)
+            answers_str = "".join(answers) if isinstance(answers, list) else answers
+            retrieved_contexts_str = (
+                " ".join(retrieved_contexts)
+                if isinstance(retrieved_contexts, list)
+                else retrieved_contexts
+            )
             row = SingleTurnSample(
-                user_input=question, 
-                response=answers_str, 
-                retrieved_contexts=[retrieved_contexts_str])
+                user_input=question,
+                response=answers_str,
+                retrieved_contexts=[retrieved_contexts_str],
+            )
             score = await answer_relevancy_metric.single_turn_ascore(row)
             print(score)
 
         except Exception as e:
             print(f"An error occurred: {e}")
 
-        return ''.join(answers)
+        return "".join(answers)
 
     @staticmethod
     async def upload(file, chunk_size, vectorstore):
         response = {}
-        existing_doc = await vectorstore.get_document_by_filename(file.filename)
-        if not existing_doc:
-            data = await file.read()
-            elements = partition_pdf(file=io.BytesIO(data))
+   
+        data = await file.read()
+        elements = partition_pdf(file=io.BytesIO(data))
+        text = [clean_pdf(ele.text) for ele in elements if ele.text]
 
-            # TODO tratamento de engenharia de dados no texto
-            def medallion(text):
-                return text if text else ""
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=20,
+            length_function=len,
+            add_start_index=True,
+        )
 
-            text = [medallion(ele.text) for ele in elements if ele.text]
+        docs = text_splitter.create_documents(text)
 
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=chunk_size,
-                chunk_overlap=20,
-                length_function=len,
-                add_start_index=True,
-            )
-
-            docs = text_splitter.create_documents(text)
-
-            for doc in docs:
-                doc.metadata = {
-                    "document_name": file.filename,
-                    "title": file.filename.split(".")[0],
-                }
-
-            vectorstore.add_documents(docs)
-
-            response = {
-                "message": "Arquivo carregado com sucesso",
-                "filename": file.filename,
-                "extracted_text": (
-                    docs[0].page_content if docs else "Texto não disponível"
-                ),
-                "embedding_size": len(docs) if docs else "Tamanho não disponível",
+        for doc in docs:
+            doc.metadata = {
+                "document_name": file.filename,
+                "title": file.filename.split(".")[0],
             }
-            return response
+
+        vectorstore.add_documents(docs)
 
         response = {
-            "message": "Arquivo já existe no banco de dados",
+            "message": "Arquivo carregado com sucesso",
             "filename": file.filename,
-            "extracted_text": docs[0].page_content if docs else "Texto não disponível",
+            "extracted_text": (
+                docs[0].page_content if docs else "Texto não disponível"
+            ),
             "embedding_size": len(docs) if docs else "Tamanho não disponível",
         }
         return response
+
