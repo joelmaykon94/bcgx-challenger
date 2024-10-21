@@ -14,8 +14,7 @@
 #### **Phase 2:**
 - [X] Rank text similarity to user questions
 - [X] Create RAG prompts
-- [ ] Clean text extract
-- [ ] Create dataset question and answer
+- [X] Clean text extract
 - [x] Validate params of LLM - GPT
 - [x] Optimized context and prompt
 #### **Phase 3:**
@@ -23,10 +22,7 @@
 - [x] Initiate dialogue with the LLM
 - [x] Consume API call on streamlit
 #### **Phase 4:**
-- [ ] Evaluate metrics for context and Q&A
-- [ ] Optimize prompts using RAG metrics
 - [x] Upload files with optimized prompts
-- [ ] Human review of answers
 
 ---
 
