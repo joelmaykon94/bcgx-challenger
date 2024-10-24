@@ -15,7 +15,8 @@ async def query(
     n_docs: int = 10,
     vectorstore=Depends(get_store),
 ):
-    result = await FilesService.query(question, temperature, n_docs, vectorstore)
+    result = f"<b>Pergunta:</b>{question} <br> <b>Temperatura do LLM:</b>{temperature} <br> <b>Quantidade de documentos similares:</b>{n_docs} <br> Dicas: separe a resposta um titulo em <b> <br> 🪴 Informações encontradas:</b> <br> e o resumo do comportamento ideal para a solução em um título em <br> <b>💡 Solução efetiva sugerida:</b>"
+    #result = await FilesService.query(question, temperature, n_docs, vectorstore)
     return JSONResponse(content={"answer": result})
 
 
