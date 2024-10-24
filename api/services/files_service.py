@@ -48,8 +48,12 @@ class FilesService:
             ),
             HumanMessagePromptTemplate.from_template("Pergunta: {question}"),
             HumanMessagePromptTemplate.from_template(
-                "Dicas: Se encontrar a resposta relevante nos documentos fornecidos, complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"
+                "Dicas: Se encontrar a resposta com informações relevantes nos documentos similares fornecidos, complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"
             ),
+             HumanMessagePromptTemplate.from_template(
+                "Dicas: separe a resposta um titulo <b>🪴 Informações encontradas:</b> quebre em três linhas e outra parte que é o resumo do comportamento ideal para a solução em um título <b>💡 Solução efetiva sugerida:</b>"
+            ),
+            
         ]
 
         prompt = ChatPromptTemplate(messages=messages)
