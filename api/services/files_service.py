@@ -30,7 +30,7 @@ class FilesService:
 
     @staticmethod
     async def query(question, temperature, n_docs, vectorstore):
-        llm = ChatOpenAI(model_name="gpt-4o", streaming=True, temperature=temperature)
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", streaming=True, temperature=temperature)
 
         messages = [
             SystemMessage(
@@ -76,10 +76,7 @@ class FilesService:
         answers = []
 
         for item in response:
-            if isinstance(item, dict):
-                answer = item.get("answer")
-            else:
-                answer = str(item)
+            answer = item.get("answer") if isinstance(item, dict) else str(item)
             if answer:
                 answers.append(answer)
 
@@ -109,7 +106,7 @@ class FilesService:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-        return "".join(answers)
+        return answers_str
 
     @staticmethod
     async def upload(file, chunk_size, vectorstore):
