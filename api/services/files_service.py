@@ -1,7 +1,6 @@
 import io
 import os
 
-from datasets import Dataset
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from ragas.metrics import AnswerRelevancy
 from ragas.dataset_schema import SingleTurnSample
@@ -12,8 +11,8 @@ from langchain.chains import RetrievalQA, StuffDocumentsChain
 from langchain_openai import ChatOpenAI
 from langchain.prompts import (
     ChatPromptTemplate,
-    HumanMessagePromptTemplate,
     PromptTemplate,
+    HumanMessagePromptTemplate,
 )
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -25,12 +24,13 @@ from utils.clean_text import clean_pdf
 class FilesService:
     @staticmethod
     def _openai_streamer(retr_qa: RetrievalQA, text: str):
-        for resp in retr_qa.run(text):
-            yield resp
+        yield from retr_qa.run(text)
 
     @staticmethod
     async def query(question, temperature, n_docs, vectorstore):
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo", streaming=True, temperature=temperature)
+        llm = ChatOpenAI(
+            model_name="gpt-4o", streaming=True, temperature=temperature
+        )
 
         messages = [
             SystemMessage(
@@ -105,6 +105,7 @@ class FilesService:
                 retrieved_contexts=[retrieved_contexts_str],
             )
             score = await answer_relevancy_metric.single_turn_ascore(row)
+            print("**score**")
             print(score)
 
         except Exception as e:
@@ -115,7 +116,7 @@ class FilesService:
     @staticmethod
     async def upload(file, chunk_size, vectorstore):
         response = {}
-   
+
         data = await file.read()
         elements = partition_pdf(file=io.BytesIO(data))
         text = [clean_pdf(ele.text) for ele in elements if ele.text]
@@ -146,4 +147,3 @@ class FilesService:
             "embedding_size": len(docs) if docs else "Tamanho não disponível",
         }
         return response
-
