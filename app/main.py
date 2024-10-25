@@ -2,7 +2,7 @@ import streamlit as st
 from core.services.query_service import QueryService
 from core.services.upload_service import UploadService
 
-st.set_page_config(page_title="🤖 EcoDocs A.I")
+st.set_page_config(page_title="Eco Docs A.I",  page_icon="🤖")
 
 st.markdown(
     """
@@ -35,7 +35,7 @@ st.markdown(
     
     .fixed-header img {
         margin-top: 3%;
-        max-width: 3%; /* Ajuste do tamanho da imagem */
+        max-width: 120px; /* Tamanho ajustado da imagem */
         height: auto;
     }
     
@@ -45,14 +45,15 @@ st.markdown(
     </style>
     
     <div class="fixed-header">
-        <img src="https://lh3.googleusercontent.com/proxy/xxYjZM08QupNK4h5IRFr0DeeI6xYcNz12Zm0l3pWnJBGWndW4S8oZrCxE61Q_5LJD4k7CkUogock91UJFnE2=w1920-h993"/>
-        <h3 style='color: #4CAF50;'>EcoDocs A.I</h1>
-        <h4 style='color: #555;'>Seu Assistente inteligente para gestão pública.</h2>
+        <img src="https://attic.sh/i79ivnxsy801bk07vu6qp0ho1pmm" alt="Logo" />
+        <h3 style='color: #4CAF50;'>EcoDocs A.I</h3>
+        <h4 style='color: #555;'>Seu Assistente inteligente para gestão pública.</h4>
         <p style='color: #555;'>© BCGX Challenge 2024</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
+
 
 if "upload_in_progress" not in st.session_state:
     st.session_state.upload_in_progress = False
