@@ -1,6 +1,6 @@
 # BCGX Challenger
-### Requiriments
-* Sistema operacional: Linux ou Windows (Macos não testado)
+### Requirements
+* Sistema operacional: Linux ou Windows (macOS não testado)
 * Docker
 * Docker Compose
 ### Run with Docker
