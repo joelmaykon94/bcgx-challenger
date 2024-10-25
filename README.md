@@ -1,5 +1,8 @@
 # BCGX Challenger
-
+### Requiriments
+* Sistema operacional: Linux ou Windows (Macos não testado)
+* Docker
+* Docker Compose
 ### Run with Docker
 **After clone this repository:**
 
