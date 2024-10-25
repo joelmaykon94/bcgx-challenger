@@ -30,7 +30,7 @@ class FilesService:
 
     @staticmethod
     async def query(question, temperature, n_docs, vectorstore):
-        llm = ChatOpenAI(model_name="gpt-4o", streaming=True, temperature=temperature)
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", streaming=True, temperature=temperature)
 
         messages = [
             SystemMessage(
@@ -48,8 +48,12 @@ class FilesService:
             ),
             HumanMessagePromptTemplate.from_template("Pergunta: {question}"),
             HumanMessagePromptTemplate.from_template(
-                "Dicas: Se encontrar a resposta relevante nos documentos fornecidos, complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"
+                "Dicas: Se encontrar a resposta com informações relevantes nos documentos similares fornecidos, complemente com um resumo do comportamento ideal para que a solução seja efetiva para a gestão pública para a seguinte questão: {question}"
             ),
+             HumanMessagePromptTemplate.from_template(
+                "Dicas: separe a resposta um titulo <b>🪴 Informações encontradas:</b> quebre em três linhas e outra parte que é o resumo do comportamento ideal para a solução em um título <b>💡 Solução efetiva sugerida:</b>"
+            ),
+            
         ]
 
         prompt = ChatPromptTemplate(messages=messages)
@@ -76,10 +80,7 @@ class FilesService:
         answers = []
 
         for item in response:
-            if isinstance(item, dict):
-                answer = item.get("answer")
-            else:
-                answer = str(item)
+            answer = item.get("answer") if isinstance(item, dict) else str(item)
             if answer:
                 answers.append(answer)
 
@@ -109,7 +110,7 @@ class FilesService:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-        return "".join(answers)
+        return answers_str
 
     @staticmethod
     async def upload(file, chunk_size, vectorstore):
