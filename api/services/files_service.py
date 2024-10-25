@@ -265,7 +265,7 @@ class FilesService:
             ),
             HumanMessagePromptTemplate.from_template("{context}"),
             HumanMessage(
-                content="Dicas: Se você não encontrar uma resposta relevante nos documentos fornecidos, diga que não sabe e não irá poder ajudar."
+                content="Dicas: Se você não encontrar uma resposta relevante nos documentos fornecidos, diga que não sabe e não irá poder ajudar, fale da possibilidade de realizar upload de novos documentos."
             ),
             HumanMessage(
                 content="Dicas: Se encontrar a resposta relevante nos documentos fornecidos, cite as referências e qual documento do banco de dados foi utilizado. Exemplo: 'O primeiro documento contém determinada informação que...'"
