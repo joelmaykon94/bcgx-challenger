@@ -43,11 +43,8 @@
 ![image](https://weaviate.io/assets/images/integration_transformers_embedding-c322f71d4ed11efa507ca71b1e344b5b.png)
 ---
 
-### API Architecture
-![api](./assets/api_ecodocs.png)
-
-### Frontend Architecture
-![frontend](./assets/frontend_ecodocs.png)
+### Project Architecture
+![api](./assets/ARCH_ECODOCS.png)
 
 
 ### BCG X Squad Five
