@@ -35,7 +35,7 @@ st.markdown(
     
     .fixed-header img {
         margin-top: 3%;
-        max-width: 120px; /* Tamanho ajustado da imagem */
+        max-width: 80px; /* Tamanho ajustado da imagem */
         height: auto;
     }
     
@@ -46,8 +46,7 @@ st.markdown(
     
     <div class="fixed-header">
         <img src="https://attic.sh/i79ivnxsy801bk07vu6qp0ho1pmm" alt="Logo" />
-        <h3 style='color: #4CAF50;'>EcoDocs A.I</h3>
-        <h4 style='color: #555;'>Seu Assistente inteligente para gestão pública.</h4>
+        <h4 style='color: #4CAF50;'>EcoDocs A.I</h4>
         <p style='color: #555;'>© BCGX Challenge 2024</p>
     </div>
     """,

@@ -56,8 +56,6 @@ Suggested questions as examples to test the app, the list of questions is in the
 ![image](https://weaviate.io/assets/images/integration_transformers_embedding-c322f71d4ed11efa507ca71b1e344b5b.png)
 ---
 
-### RAGAS Metrics Evaluate
-* AnswerRelevancy: 
 ___
 ### BCG X Squad Five
 
